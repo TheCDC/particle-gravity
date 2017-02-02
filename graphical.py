@@ -82,7 +82,7 @@ class GraphicalSimulation:
                                tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
         self.surf.blit(self.bottom_layer, (0, 0),
                        special_flags=pygame.BLEND_MAX)
-        self.surf.blit(self.top_layer, (0, 0), special_flags=pygame.BLEND_MAX)
+        self.surf.blit(self.top_layer, (0, 0), special_flags=pygame.BLEND_MULT)
 
 
 def main():
