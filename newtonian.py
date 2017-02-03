@@ -6,6 +6,7 @@ import numpy
 import time
 # G = 2.071e-43
 G = 6.67300e-11
+# G = 6.67300e-9
 
 
 def distance(p1, p2):
@@ -29,10 +30,10 @@ class Particle:
         self.mass = mass
         self.pos = numpy.array(position, dtype=float)
         if velocity:
-            self.velocity = velocity
+            self.velocity = numpy.array(list(map(float, velocity)))
         else:
             self.velocity = numpy.zeros(len(position), dtype=float)
-        self.acceleration = numpy.array(self.velocity, dtype=float)
+        self.acceleration = numpy.zeros(len(position), dtype=float)
         self.anchored = anchored
 
     @property
@@ -167,7 +168,7 @@ def main():
         t.hideturtle()
         t.goto(p.getpos())
         t.clear()
-        t.dot((math.log(p.mass)/math.log(10)))
+        t.dot((math.log(p.mass) / math.log(10)))
     granularity = 100
     time_step = 1
     try:

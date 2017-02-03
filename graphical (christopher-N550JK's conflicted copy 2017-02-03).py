@@ -95,7 +95,7 @@ def default_simulation():
     size = (WIDTH, HEIGHT)
 
     trail_surface = pygame.Surface(size)
-    sim = GraphicalSimulation(trail_surface, random.randint(3, 30))
+    sim = GraphicalSimulation(trail_surface, random.randint(3, 12))
     return sim
 
 
