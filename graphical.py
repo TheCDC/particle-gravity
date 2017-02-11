@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import newtonian
 import pygame
+import pygame.gfxdraw
 import random
 import time
 import sys
@@ -23,6 +24,9 @@ class Turtle:
     def setpos(self, pos):
         if self.pen:
             pygame.draw.aaline(self.surf, self.color, self.pos, pos, 1)
+            # x1, y1 = tuple(map(int, self.pos))
+            # x2, y2 = tuple(map(int, pos))
+            # pygame.gfxdraw.line(self.surf, x1, y1, x2, y2, self.color)
         self.pos = pos[:]
 
     def getpos(self):
@@ -43,7 +47,7 @@ class GraphicalSimulation:
             (self.surf.get_width(), self.surf.get_height()))
         self.size = (self.bottom_layer.get_width(),
                      self.bottom_layer.get_height())
-        if not (N == None):
+        if N is None:
             n = 12
         else:
             n = N
@@ -73,15 +77,22 @@ class GraphicalSimulation:
         if self.frames == 0:
             for t, p in zip(self.turtles, self.field.get_particles()):
                 t.setpos(p.getpos())
-                pygame.draw.circle(self.bottom_layer, t.color,
-                                   tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
+                # pygame.draw.circle(self.bottom_layer, t.color,
+                # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 /
+                # 2)))
+                x, y = tuple(map(int, t.getpos()))
+                pygame.gfxdraw.aacircle(self.bottom_layer,
+                                      x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
         self.frames += 1
         self.top_layer.fill((0, 0, 0))
         self.surf.fill((0, 0, 0))
         for t, p in zip(self.turtles, self.field.get_particles()):
             t.setpos(p.getpos())
-            pygame.draw.circle(self.top_layer, t.color,
-                               tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
+            # pygame.draw.circle(self.top_layer, t.color,
+            # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
+            x, y = tuple(map(int, t.getpos()))
+            pygame.gfxdraw.filled_circle(self.top_layer,
+                                  x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
         self.surf.blit(self.bottom_layer, (0, 0),
                        special_flags=pygame.BLEND_MAX)
         self.surf.blit(self.top_layer, (0, 0),
@@ -95,7 +106,7 @@ def default_simulation():
     size = (WIDTH, HEIGHT)
 
     trail_surface = pygame.Surface(size)
-    sim = GraphicalSimulation(trail_surface, random.randint(3, 30))
+    sim = GraphicalSimulation(trail_surface, random.randint(3,15))
     return sim
 
 
@@ -109,10 +120,10 @@ def main():
     # WIDTH = 600
     # HEIGHT = 600
     DISPLAYSURF = pygame.display.set_mode(
-        size, pygame.DOUBLEBUF | pygame.FULLSCREEN)
+        size, pygame.FULLSCREEN | pygame.DOUBLEBUF)
     sim = default_simulation()
     ti = time.time()
-
+    total_time = 0
     def wipe():
         for i in range(0, 255, 255 // 60):
             DISPLAYSURF.fill((i, i, i))
@@ -147,7 +158,7 @@ def main():
             if pygame.mouse.get_pressed()[2] == 1:
                 do_reset = True
 
-        granularity = 20
+        granularity = 10
         step = 0.25
         for _ in range(granularity):
             sim.update(step / granularity)
