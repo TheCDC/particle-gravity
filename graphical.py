@@ -50,6 +50,8 @@ class GraphicalSimulation:
             depth=32)
         self.top_layer = pygame.Surface(
             (self.bottom_layer.get_width(), self.bottom_layer.get_height()),
+            # pygame.HWSURFACE puts the surface in video memory
+            # pygame.SRCALPHA initializes the surface with per-pixel alpha
             flags=pygame.HWSURFACE | pygame.SRCALPHA,
             depth=32).convert_alpha()
 
@@ -183,7 +185,11 @@ def main():
         step = 0.25
         for _ in range(granularity):
             sim.update(step / granularity)
-        sim.draw()
+        try:
+            sim.draw()
+        except OverflowError:
+            save()
+            do_reset = True
         CLOCK.tick(60)
         # time.sleep(1/60)
         DISPLAYSURF.blit(sim.surf, (0, 0), special_flags=0)
