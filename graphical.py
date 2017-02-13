@@ -41,29 +41,39 @@ class Turtle:
 
 class GraphicalSimulation:
 
-    def __init__(self, surface, N=None):
+    def __init__(self, surface, N=None, bg_color=(0, 0, 0)):
+        self.bg_color = tuple(bg_color[:])
         self.surf = surface
         self.bottom_layer = pygame.Surface(
-            (self.surf.get_width(), self.surf.get_height()))
+            (self.surf.get_width(), self.surf.get_height()),
+            flags=pygame.HWSURFACE,
+            depth=32)
+        self.top_layer = pygame.Surface(
+            (self.bottom_layer.get_width(), self.bottom_layer.get_height()),
+            flags=pygame.HWSURFACE | pygame.SRCALPHA,
+            depth=32).convert_alpha()
+
+        self.bottom_layer.fill(self.bg_color)
         self.size = (self.bottom_layer.get_width(),
                      self.bottom_layer.get_height())
         if N is None:
             n = 12
         else:
             n = N
-
+        # self.bottom_layer.fill(self.bg_color)
         mass_range_exponents = (8, 12)
         self.particles = [newtonian.Particle(mass=random.randint(*[10**i for i in mass_range_exponents]), position=[
-                                             random.randint(0, a) for a in self.size], velocity=[(random.random() - 0.5) * 24 for i in range(2)]) for i in range(n)]
+            random.randint(0, a) for a in self.size], velocity=[(random.random() - 0.5) * 24 for i in range(2)]) for i in range(n)]
         # big mass in the center
         self.particles.append(newtonian.Particle(
-            mass=10**(max(mass_range_exponents)), position=[(random.random() - 0.5) * a / 4 + a / 2 for a in self.size], velocity=(0, 0)))
+            mass=10**(max(mass_range_exponents)),
+            position=[(random.random() - 0.5) * a /
+                      4 + a / 2 for a in self.size],
+            velocity=(0, 0)))
 
         self.field = newtonian.ParticleField(self.particles)
         self.turtles = [Turtle(self.bottom_layer, randcolor())
                         for _ in self.particles]
-        self.top_layer = pygame.Surface(
-            (self.bottom_layer.get_width(), self.bottom_layer.get_height()))
         for t, p in zip(self.turtles, self.field.get_particles()):
             t.penup()
             t.setpos(p.getpos())
@@ -82,21 +92,26 @@ class GraphicalSimulation:
                 # 2)))
                 x, y = tuple(map(int, t.getpos()))
                 pygame.gfxdraw.aacircle(self.bottom_layer,
-                                      x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
+                                        x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
         self.frames += 1
-        self.top_layer.fill((0, 0, 0))
-        self.surf.fill((0, 0, 0))
+        # self.top_layer.fill(self.bg_color)
+        self.top_layer.fill((0, 0, 0, 0))
+        # self.surf.fill(self.bg_color)
         for t, p in zip(self.turtles, self.field.get_particles()):
             t.setpos(p.getpos())
             # pygame.draw.circle(self.top_layer, t.color,
             # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
             x, y = tuple(map(int, t.getpos()))
             pygame.gfxdraw.filled_circle(self.top_layer,
-                                  x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
+                                         x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
         self.surf.blit(self.bottom_layer, (0, 0),
-                       special_flags=pygame.BLEND_MAX)
+                       # special_flags=pygame.BLEND_RGBA_MULT
+                       special_flags=0
+                       )
         self.surf.blit(self.top_layer, (0, 0),
-                       special_flags=pygame.BLEND_RGBA_ADD)
+                       # special_flags=pygame.BLEND_RGB_MAX
+                       special_flags=0
+                       )
 
 
 def default_simulation():
@@ -106,7 +121,9 @@ def default_simulation():
     size = (WIDTH, HEIGHT)
 
     trail_surface = pygame.Surface(size)
-    sim = GraphicalSimulation(trail_surface, random.randint(3,15))
+    trail_surface.fill((255, 255, 255))
+    sim = GraphicalSimulation(
+        trail_surface, random.randint(3, 15), bg_color=(0, 0, 0))
     return sim
 
 
@@ -124,6 +141,7 @@ def main():
     sim = default_simulation()
     ti = time.time()
     total_time = 0
+
     def wipe():
         for i in range(0, 255, 255 // 60):
             DISPLAYSURF.fill((i, i, i))
@@ -133,16 +151,18 @@ def main():
             DISPLAYSURF.fill((i, i, i))
             pygame.display.update()
             CLOCK.tick(60)
-        DISPLAYSURF.fill((0, 0, 0))
+        DISPLAYSURF.fill((1, 1, 1))
+
+    def save():
+        pygame.image.save(DISPLAYSURF, os.path.join(
+            "screenshots", time.strftime("%Y-%m-%d %H-%M-%S") + ".png"))
 
     do_reset = False
     while True:
         tf = time.time()
         if tf - ti >= 60:
-            pygame.image.save(DISPLAYSURF, os.path.join(
-                "screenshots", time.strftime("%Y-%m-%d %H-%M-%S") + ".png"))
             do_reset = True
-
+            save()
         if do_reset:
             wipe()
             sim = default_simulation()
@@ -152,6 +172,7 @@ def main():
         for event in pygame.event.get():
             #~ print(event)
             if event.type == pygame.QUIT or pygame.mouse.get_pressed()[0] == 1:
+                save()
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
@@ -165,7 +186,7 @@ def main():
         sim.draw()
         CLOCK.tick(60)
         # time.sleep(1/60)
-        DISPLAYSURF.blit(sim.surf, (0, 0))
+        DISPLAYSURF.blit(sim.surf, (0, 0), special_flags=0)
         pygame.display.update()
         # print("yes")
 if __name__ == '__main__':
