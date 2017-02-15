@@ -14,7 +14,7 @@ def randcolor():
 
 
 class Turtle:
-	"""A small calss to emulate python turtle functionality but on a pygame.Surface."""
+    """A small calss to emulate python turtle functionality but on a pygame.Surface."""
     def __init__(self, surf, color):
         self.surf = surf
         self.pos = (0, 0)
@@ -22,7 +22,7 @@ class Turtle:
         self.color = color
 
     def setpos(self, pos):
-    	"""Primary method of moving the turtle."""
+        """Primary method of moving the turtle."""
         if self.pen:
             pygame.draw.aaline(self.surf, self.color, self.pos, pos, 1)
             # pygame.draw.line(self.surf, self.color, self.pos, pos, 10)
@@ -42,11 +42,11 @@ class Turtle:
 
 
 class GraphicalSimulation:
-	"""Display a newtonian.ParticleField on a pygame.Surface"""
+    """Display a newtonian.ParticleField on a pygame.Surface"""
     def __init__(self, surface, N=None, bg_color=(0, 0, 0)):
-    	"""surface: the target surface on which to draw everything
-    	N: number of particles to simulate
-    	bg_color: background color"""
+        """surface: the target surface on which to draw everything
+        N: number of particles to simulate
+        bg_color: background color"""
         self.bg_color = tuple(bg_color[:])
         self.surf = surface
         self.bottom_layer = pygame.Surface(
@@ -67,7 +67,6 @@ class GraphicalSimulation:
             n = 12
         else:
             n = N
-        # self.bottom_layer.fill(self.bg_color)
         mass_range_exponents = (8, 12)
         self.particles = [newtonian.Particle(mass=random.randint(*[10**i for i in mass_range_exponents]), position=[
             random.randint(0, a) for a in self.size], velocity=[(random.random() - 0.5) * 24 for i in range(2)]) for i in range(n)]
@@ -88,11 +87,11 @@ class GraphicalSimulation:
         self.frames = 0
 
     def update(self, step=1 / 100):
-    	"""Advance the simulation an amount of time equal to step."""
+        """Advance the simulation an amount of time equal to step."""
         self.field.time_step(step)
 
     def draw(self):
-    	"""Update internal surfaces wiht latest simulation state."""
+        """Update internal surfaces with latest simulation state."""
         if self.frames == 0:
             for t, p in zip(self.turtles, self.field.get_particles()):
                 t.setpos(p.getpos())
@@ -124,7 +123,7 @@ class GraphicalSimulation:
 
 
 def default_simulation():
-	"""Instantiate a GraphicalSimulation with smoe default parameters."""
+    """Instantiate a GraphicalSimulation with smoe default parameters."""
     infoObj = pygame.display.Info()
     WIDTH = int(infoObj.current_w)
     HEIGHT = int(infoObj.current_h)
@@ -153,8 +152,8 @@ def main():
     total_time = 0
 
     def wipe():
-    	"""A quick routine for transition to new simulation after
-    	a reset"""
+        """A quick routine for transition to new simulation after
+        a reset"""
         for i in range(0, 255, 255 // 60):
             DISPLAYSURF.fill((i, i, i))
             pygame.display.update()
@@ -166,7 +165,7 @@ def main():
         DISPLAYSURF.fill((1, 1, 1))
 
     def save():
-    	"""Helper to save the current display surface to a file."""
+        """Helper to save the current display surface to a file."""
         pygame.image.save(DISPLAYSURF, os.path.join(
             "screenshots", time.strftime("%Y-%m-%d %H-%M-%S") + ".png"))
 
@@ -185,13 +184,13 @@ def main():
         for event in pygame.event.get():
             #~ print(event)
             if event.type == pygame.QUIT or pygame.mouse.get_pressed()[0] == 1:
-            	# handle a quit with saving
+                # handle a quit with saving
                 save()
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
             if pygame.key.get_pressed()[pygame.K_q]:
-            	# handle a quit without saving
+                # handle a quit without saving
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
@@ -207,7 +206,7 @@ def main():
         try:
             sim.draw()
         except OverflowError:
-        	# handle rare case of physics gone wrong.
+            # handle rare case of physics gone wrong.
             save()
             do_reset = True
 
