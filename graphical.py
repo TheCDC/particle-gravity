@@ -14,7 +14,7 @@ def randcolor():
 
 
 class Turtle:
-
+	"""A small calss to emulate python turtle functionality but on a pygame.Surface."""
     def __init__(self, surf, color):
         self.surf = surf
         self.pos = (0, 0)
@@ -22,8 +22,10 @@ class Turtle:
         self.color = color
 
     def setpos(self, pos):
+    	"""Primary method of moving the turtle."""
         if self.pen:
             pygame.draw.aaline(self.surf, self.color, self.pos, pos, 1)
+            # pygame.draw.line(self.surf, self.color, self.pos, pos, 10)
             # x1, y1 = tuple(map(int, self.pos))
             # x2, y2 = tuple(map(int, pos))
             # pygame.gfxdraw.line(self.surf, x1, y1, x2, y2, self.color)
@@ -40,8 +42,11 @@ class Turtle:
 
 
 class GraphicalSimulation:
-
+	"""Display a newtonian.ParticleField on a pygame.Surface"""
     def __init__(self, surface, N=None, bg_color=(0, 0, 0)):
+    	"""surface: the target surface on which to draw everything
+    	N: number of particles to simulate
+    	bg_color: background color"""
         self.bg_color = tuple(bg_color[:])
         self.surf = surface
         self.bottom_layer = pygame.Surface(
@@ -83,9 +88,11 @@ class GraphicalSimulation:
         self.frames = 0
 
     def update(self, step=1 / 100):
+    	"""Advance the simulation an amount of time equal to step."""
         self.field.time_step(step)
 
     def draw(self):
+    	"""Update internal surfaces wiht latest simulation state."""
         if self.frames == 0:
             for t, p in zip(self.turtles, self.field.get_particles()):
                 t.setpos(p.getpos())
@@ -117,6 +124,7 @@ class GraphicalSimulation:
 
 
 def default_simulation():
+	"""Instantiate a GraphicalSimulation with smoe default parameters."""
     infoObj = pygame.display.Info()
     WIDTH = int(infoObj.current_w)
     HEIGHT = int(infoObj.current_h)
@@ -145,6 +153,8 @@ def main():
     total_time = 0
 
     def wipe():
+    	"""A quick routine for transition to new simulation after
+    	a reset"""
         for i in range(0, 255, 255 // 60):
             DISPLAYSURF.fill((i, i, i))
             pygame.display.update()
@@ -156,6 +166,7 @@ def main():
         DISPLAYSURF.fill((1, 1, 1))
 
     def save():
+    	"""Helper to save the current display surface to a file."""
         pygame.image.save(DISPLAYSURF, os.path.join(
             "screenshots", time.strftime("%Y-%m-%d %H-%M-%S") + ".png"))
 
@@ -174,11 +185,13 @@ def main():
         for event in pygame.event.get():
             #~ print(event)
             if event.type == pygame.QUIT or pygame.mouse.get_pressed()[0] == 1:
+            	# handle a quit with saving
                 save()
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
             if pygame.key.get_pressed()[pygame.K_q]:
+            	# handle a quit without saving
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
@@ -186,6 +199,7 @@ def main():
             if pygame.mouse.get_pressed()[2] == 1:
                 do_reset = True
 
+        # advance the simulation in granular steps
         granularity = 10
         step = 0.25
         for _ in range(granularity):
@@ -193,12 +207,12 @@ def main():
         try:
             sim.draw()
         except OverflowError:
+        	# handle rare case of physics gone wrong.
             save()
             do_reset = True
+
         CLOCK.tick(60)
-        # time.sleep(1/60)
         DISPLAYSURF.blit(sim.surf, (0, 0), special_flags=0)
         pygame.display.update()
-        # print("yes")
 if __name__ == '__main__':
     main()
