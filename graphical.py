@@ -67,11 +67,11 @@ class GraphicalSimulation:
         self.particles = [newtonian.Particle(mass=random.randint(*[10**i for i in mass_range_exponents]), position=[
             random.randint(0, a) for a in self.size], velocity=[(random.random() - 0.5) * 24 for i in range(2)]) for i in range(n)]
         # big mass in the center
-        self.particles.append(newtonian.Particle(
-            mass=10**(max(mass_range_exponents)),
-            position=[(random.random() - 0.5) * a /
-                      4 + a / 2 for a in self.size],
-            velocity=(0, 0)))
+        # self.particles.append(newtonian.Particle(
+        #     mass=10**(max(mass_range_exponents)),
+        #     position=[(random.random() - 0.5) * a /
+        #               4 + a / 2 for a in self.size],
+        #     velocity=(0, 0)))
 
         self.field = newtonian.ParticleField(self.particles)
         self.turtles = [Turtle(self.bottom_layer, randcolor())
@@ -125,7 +125,7 @@ def default_simulation():
     trail_surface = pygame.Surface(size)
     trail_surface.fill((255, 255, 255))
     sim = GraphicalSimulation(
-        trail_surface, random.randint(3, 15), bg_color=(0, 0, 0))
+        trail_surface, random.randint(3, 12), bg_color=(32, 32, 32))
     return sim
 
 
@@ -139,7 +139,7 @@ def main():
     # WIDTH = 600
     # HEIGHT = 600
     DISPLAYSURF = pygame.display.set_mode(
-        size, pygame.FULLSCREEN | pygame.DOUBLEBUF)
+        size, pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE, 32)
     sim = default_simulation()
     ti = time.time()
     total_time = 0
@@ -178,6 +178,11 @@ def main():
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
+            if pygame.key.get_pressed()[pygame.K_q]:
+                pygame.mixer.quit()
+                pygame.quit()
+                sys.exit()
+
             if pygame.mouse.get_pressed()[2] == 1:
                 do_reset = True
 
