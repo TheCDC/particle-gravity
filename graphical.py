@@ -14,7 +14,8 @@ def randcolor():
 
 
 class Turtle:
-    """A small calss to emulate python turtle functionality but on a pygame.Surface."""
+    """A small class to emulate python turtle functionality but on a pygame.Surface."""
+
     def __init__(self, surf, color):
         self.surf = surf
         self.pos = (0, 0)
@@ -43,6 +44,7 @@ class Turtle:
 
 class GraphicalSimulation:
     """Display a newtonian.ParticleField on a pygame.Surface"""
+
     def __init__(self, surface, N=None, bg_color=(0, 0, 0)):
         """surface: the target surface on which to draw everything
         N: number of particles to simulate
@@ -123,7 +125,7 @@ class GraphicalSimulation:
 
 
 def default_simulation():
-    """Instantiate a GraphicalSimulation with smoe default parameters."""
+    """Instantiate a GraphicalSimulation with some default parameters."""
     infoObj = pygame.display.Info()
     WIDTH = int(infoObj.current_w)
     HEIGHT = int(infoObj.current_h)

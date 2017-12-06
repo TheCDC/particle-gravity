@@ -26,7 +26,11 @@ def accel_vector(p1, p2):
 
 class Particle:
 
-    def __init__(self, mass: float, position: numpy.array, velocity=None, anchored=False):
+    def __init__(self,
+                 mass: float,
+                 position: numpy.array,
+                 velocity=None,
+                 anchored=False):
         self.mass = mass
         self.pos = numpy.array(position, dtype=float)
         if velocity:
@@ -146,11 +150,6 @@ WIDTH, HEIGHT = 1920, 1080
 
 
 def main():
-    # turtle.setup(600, 600)
-    test_Particle()
-    test_distance()
-    test_ParticleField()
-
     turtle.setup(WIDTH, HEIGHT)
     # screen.colormode(255)
     ps = [Particle(random.randint(1e8, 1e12),
