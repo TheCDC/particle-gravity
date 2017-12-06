@@ -124,22 +124,59 @@ class GraphicalSimulation:
                        )
 
 
-def default_simulation():
+def default_simulation(surface=None):
     """Instantiate a GraphicalSimulation with some default parameters."""
-    infoObj = pygame.display.Info()
-    WIDTH = int(infoObj.current_w)
-    HEIGHT = int(infoObj.current_h)
-    size = (WIDTH, HEIGHT)
-
-    trail_surface = pygame.Surface(size)
-    trail_surface.fill((255, 255, 255))
+    try:
+        infoObj = pygame.display.Info()
+        WIDTH = int(infoObj.current_w)
+        HEIGHT = int(infoObj.current_h)
+        size = (WIDTH, HEIGHT)
+    except pygame.error:
+        size = (1920, 1080)
+    if surface is None:
+        trail_surface = pygame.Surface(size)
+        trail_surface.fill((255, 255, 255))
+    else:
+        trail_surface = surface
     sim = GraphicalSimulation(
         trail_surface, random.randint(3, 12), bg_color=(32, 32, 32))
     return sim
 
 
+def generate_filename():
+    return time.strftime("%Y-%m-%d %H-%M-%S") + ".png"
+
+
+def headless_generate_art():
+    # set SDL to use the dummy NULL video driver,
+    #   so it doesn't need a windowing system.
+    # os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+    pygame.display.init()
+    pygame.display.set_mode((1920, 1080),
+                            pygame.DOUBLEBUF, 32)
+    # DISPLAYSURF = pygame.display.set_mode(
+    #     (1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE, 32)
+    surf = pygame.Surface((1920, 1080))
+
+    sim = default_simulation(surface=surf)
+    for i in range(2000):
+        # advance the simulation in granular steps
+        granularity = 10
+        step = 0.25
+        for _ in range(granularity):
+            sim.update(step / granularity)
+        try:
+            sim.draw()
+        except OverflowError:
+            # handle rare case of physics gone wrong.
+            raise RuntimeError("Physics error")
+            do_reset = True
+    pygame.image.save(sim.surf, os.path.join(
+        'screenshots', generate_filename()))
+
+
 def main():
-    pygame.init()
     infoObj = pygame.display.Info()
     WIDTH = int(infoObj.current_w)
     HEIGHT = int(infoObj.current_h)
@@ -169,12 +206,15 @@ def main():
     def save():
         """Helper to save the current display surface to a file."""
         pygame.image.save(DISPLAYSURF, os.path.join(
-            "screenshots", time.strftime("%Y-%m-%d %H-%M-%S") + ".png"))
+            "screenshots", generate_filename()))
 
     do_reset = False
+    frames = 0
     while True:
+        frames += 1
         tf = time.time()
         if tf - ti >= 60:
+            print(frames, "frames")
             do_reset = True
             save()
         if do_reset:
@@ -209,6 +249,7 @@ def main():
             sim.draw()
         except OverflowError:
             # handle rare case of physics gone wrong.
+            print("Physics error. Resetting...")
             save()
             do_reset = True
 
