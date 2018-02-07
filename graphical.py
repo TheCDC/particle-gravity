@@ -7,10 +7,15 @@ import time
 import sys
 import math
 import os
+import colorsys
+
+
+def rgb_float_to_int(rgb):
+    return tuple(map(lambda channel: int(channel * 255), rgb))
 
 
 def randcolor():
-    return tuple([int(random.random() * 255) for i in range(3)])
+    return rgb_float_to_int(colorsys.hsv_to_rgb(random.random(), 1, 1))
 
 
 class Turtle:
@@ -70,8 +75,13 @@ class GraphicalSimulation:
         else:
             n = N
         mass_range_exponents = (8, 12)
-        self.particles = [newtonian.Particle(mass=random.randint(*[10**i for i in mass_range_exponents]), position=[
-            random.randint(0, a) for a in self.size], velocity=[(random.random() - 0.5) * 24 for i in range(2)]) for i in range(n)]
+        self.particles = [
+            newtonian.Particle(
+                mass=random.randint(*[10**i for i in mass_range_exponents]),
+                position=[random.randint(0, a) for a in self.size],
+                velocity=[(random.random() - 0.5) * 24 for i in range(2)])
+            for i in range(n)
+        ]
         # big mass in the center
         # self.particles.append(newtonian.Particle(
         #     mass=10**(max(mass_range_exponents)),
@@ -80,8 +90,9 @@ class GraphicalSimulation:
         #     velocity=(0, 0)))
 
         self.field = newtonian.ParticleField(self.particles)
-        self.turtles = [Turtle(self.bottom_layer, randcolor())
-                        for _ in self.particles]
+        self.turtles = [
+            Turtle(self.bottom_layer, randcolor()) for _ in self.particles
+        ]
         for t, p in zip(self.turtles, self.field.get_particles()):
             t.penup()
             t.setpos(p.getpos())
@@ -101,8 +112,9 @@ class GraphicalSimulation:
                 # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 /
                 # 2)))
                 x, y = tuple(map(int, t.getpos()))
-                pygame.gfxdraw.aacircle(self.bottom_layer,
-                                        x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
+                pygame.gfxdraw.aacircle(self.bottom_layer, x, y,
+                                        int((math.log(p.mass**2))**(1 / 2)),
+                                        t.color)
         self.frames += 1
         # self.top_layer.fill(self.bg_color)
         self.top_layer.fill((0, 0, 0, 0))
@@ -112,16 +124,19 @@ class GraphicalSimulation:
             # pygame.draw.circle(self.top_layer, t.color,
             # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
             x, y = tuple(map(int, t.getpos()))
-            pygame.gfxdraw.filled_circle(self.top_layer,
-                                         x, y, int((math.log(p.mass**2))**(1 / 2)), t.color)
-        self.surf.blit(self.bottom_layer, (0, 0),
-                       # special_flags=pygame.BLEND_RGBA_MULT
-                       special_flags=0
-                       )
-        self.surf.blit(self.top_layer, (0, 0),
-                       # special_flags=pygame.BLEND_RGB_MAX
-                       special_flags=0
-                       )
+            pygame.gfxdraw.filled_circle(self.top_layer, x, y,
+                                         int((math.log(p.mass**2))**(1 / 2)),
+                                         t.color)
+        self.surf.blit(
+            self.bottom_layer,
+            (0, 0),
+            # special_flags=pygame.BLEND_RGBA_MULT
+            special_flags=0)
+        self.surf.blit(
+            self.top_layer,
+            (0, 0),
+            # special_flags=pygame.BLEND_RGB_MAX
+            special_flags=0)
 
 
 def default_simulation(surface=None):
@@ -153,8 +168,7 @@ def headless_generate_art():
     # os.environ["SDL_VIDEODRIVER"] = "dummy"
 
     pygame.display.init()
-    pygame.display.set_mode((1920, 1080),
-                            pygame.DOUBLEBUF, 32)
+    pygame.display.set_mode((1920, 1080), pygame.DOUBLEBUF, 32)
     # DISPLAYSURF = pygame.display.set_mode(
     #     (1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE, 32)
     surf = pygame.Surface((1920, 1080))
@@ -172,8 +186,8 @@ def headless_generate_art():
             # handle rare case of physics gone wrong.
             raise RuntimeError("Physics error")
             do_reset = True
-    pygame.image.save(sim.surf, os.path.join(
-        'screenshots', generate_filename()))
+    pygame.image.save(sim.surf, os.path.join('screenshots',
+                                             generate_filename()))
 
 
 def main():
@@ -206,8 +220,8 @@ def main():
 
     def save():
         """Helper to save the current display surface to a file."""
-        pygame.image.save(DISPLAYSURF, os.path.join(
-            "screenshots", generate_filename()))
+        pygame.image.save(DISPLAYSURF,
+                          os.path.join("screenshots", generate_filename()))
 
     do_reset = False
     frames = 0
@@ -257,5 +271,7 @@ def main():
         CLOCK.tick(60)
         DISPLAYSURF.blit(sim.surf, (0, 0), special_flags=0)
         pygame.display.update()
+
+
 if __name__ == '__main__':
     main()
