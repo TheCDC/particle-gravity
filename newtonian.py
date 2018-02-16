@@ -6,6 +6,7 @@ import numpy
 import time
 # G = 2.071e-43
 G = 6.67300e-11
+
 # G = 6.67300e-9
 
 
@@ -25,7 +26,6 @@ def accel_vector(p1, p2):
 
 
 class Particle:
-
     def __init__(self,
                  mass: float,
                  position: numpy.array,
@@ -50,16 +50,17 @@ class Particle:
 
     def __add__(self, other):
         if not isinstance(other, Particle):
-            raise ValueError(
-                "Can only add Particle to Particle not {}".format(repr(other)))
+            raise ValueError("Can only add Particle to Particle not {}".format(
+                repr(other)))
         else:
             if len(self.pos) != len(other.pos):
                 raise ValueError(
                     "Can not add particles with different dimensionalities.")
             ms = numpy.array([self.mass, other.mass])
             sm = sum(ms)
-            p = Particle(self.mass + other.mass,
-                         (self.pos * self.mass / sm + other.pos * other.mass / sm) / 2)
+            p = Particle(
+                self.mass + other.mass,
+                (self.pos * self.mass / sm + other.pos * other.mass / sm) / 2)
             return p
 
     def getpos(self):
@@ -88,7 +89,6 @@ class Particle:
 
 
 class ParticleField:
-
     def __init__(self, particles):
         self.ps = particles
 
@@ -114,7 +114,8 @@ def test_Particle():
     print(p1 + p2)
     ps = []
     for _ in range(10):
-        ps.append(Particle(random.random(), (random.random(), random.random())))
+        ps.append(
+            Particle(random.random(), (random.random(), random.random())))
     print(sum(ps[1:], ps[0]))
     p1.be_pulled(p2)
     p1.simulate(1)
@@ -123,13 +124,16 @@ def test_Particle():
 
 def test_distance():
     assert distance(Particle(0, (0, 0)), Particle(0, (0, 1))) == 1
-    assert angle(Particle(0, (0, 0)), Particle(
-        0, (0, 1))) * 180 / math.pi == 90
+    assert angle(Particle(0, (0, 0)), Particle(0,
+                                               (0, 1))) * 180 / math.pi == 90
 
 
 def test_ParticleField():
-    ps = [Particle(random.randint(10, 200), [float(random.randint(0, 1)) for i in range(2)])
-          for i in range(10)]
+    ps = [
+        Particle(
+            random.randint(10, 200),
+            [float(random.randint(0, 1)) for i in range(2)]) for i in range(10)
+    ]
     pf = ParticleField(ps)
     # for i in range(5):
     #     print([str(i) for i in pf.get_particles()])
@@ -146,15 +150,21 @@ def test_ParticleField():
 
 def randcolor():
     return tuple([random.random() for i in range(3)])
+
+
 WIDTH, HEIGHT = 1920, 1080
 
 
 def main():
     turtle.setup(WIDTH, HEIGHT)
     # screen.colormode(255)
-    ps = [Particle(random.randint(1e8, 1e12),
-                   [random.randint(-a // 2, a // 2) for a in (WIDTH, HEIGHT)],
-                   velocity=[(random.random() - 0.5) * 8 for i in range(2)]) for i in range(12)]
+    ps = [
+        Particle(
+            random.randint(1e8, 1e12),
+            [random.randint(-a // 2, a // 2) for a in (WIDTH, HEIGHT)],
+            velocity=[(random.random() - 0.5) * 8 for i in range(2)])
+        for i in range(12)
+    ]
     # ps.append(Particle(1e10, [0, 0], anchored=True))
     ts = [turtle.Turtle() for i in ps]
     pf = ParticleField(ps)
@@ -175,7 +185,9 @@ def main():
         while going:
             parts = pf.get_particles()
             # print(list(map(str, parts)))
-            if all(abs(p.pos[0]) > WIDTH / 2 or abs(p.pos[1]) > HEIGHT / 2 for p in parts):
+            if all(
+                    abs(p.pos[0]) > WIDTH / 2 or abs(p.pos[1]) > HEIGHT / 2
+                    for p in parts):
                 going = False
             for index, p in enumerate(parts):
                 t = ts[index]

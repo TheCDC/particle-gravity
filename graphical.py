@@ -50,11 +50,18 @@ class Turtle:
 class GraphicalSimulation:
     """Display a newtonian.ParticleField on a pygame.Surface"""
 
-    def __init__(self, surface, N=None, bg_color=(0, 0, 0)):
+    def __init__(
+            self,
+            surface,
+            N=None,
+            bg_color=(0, 0, 0),
+            enable_boundary=False,
+    ):
         """surface: the target surface on which to draw everything
         N: number of particles to simulate
         bg_color: background color"""
         self.bg_color = tuple(bg_color[:])
+        self.enable_boundary = enable_boundary
         self.surf = surface
         self.bottom_layer = pygame.Surface(
             (self.surf.get_width(), self.surf.get_height()),
@@ -102,6 +109,18 @@ class GraphicalSimulation:
     def update(self, step=1 / 100):
         """Advance the simulation an amount of time equal to step."""
         self.field.time_step(step)
+        if self.enable_boundary:
+            for p in self.field.ps:
+                for d in range(2):
+                    swapped = False
+                    if p.pos[d] > self.size[d]:
+                        p.pos[d] = self.size[d] - 1
+                        swapped = True
+                    elif p.pos[d] < 0:
+                        p.pos[d] = 0
+                        swapped = True
+                    if swapped:
+                        p.velocity[d] = -p.velocity[d] / 2
 
     def draw(self):
         """Update internal surfaces with latest simulation state."""
@@ -154,7 +173,10 @@ def default_simulation(surface=None):
     else:
         trail_surface = surface
     sim = GraphicalSimulation(
-        trail_surface, random.randint(3, 12), bg_color=(32, 32, 32))
+        trail_surface,
+        random.randint(3, 12),
+        bg_color=(32, 32, 32),
+        enable_boundary=True)
     return sim
 
 
@@ -246,7 +268,8 @@ def main():
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
-            if pygame.key.get_pressed()[pygame.K_q]:
+            if pygame.key.get_pressed()[pygame.K_q] or pygame.key.get_pressed(
+            )[pygame.K_ESCAPE]:
                 # handle a quit without saving
                 pygame.mixer.quit()
                 pygame.quit()
