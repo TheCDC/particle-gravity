@@ -8,6 +8,7 @@ import sys
 import math
 import os
 import colorsys
+import numpy as np
 
 
 def rgb_float_to_int(rgb):
@@ -47,6 +48,10 @@ class Turtle:
         self.pen = True
 
 
+def mass_to_radius(m):
+    return int(2 * ((math.log(m))))
+
+
 class GraphicalSimulation:
     """Display a newtonian.ParticleField on a pygame.Surface"""
 
@@ -81,12 +86,12 @@ class GraphicalSimulation:
             n = 12
         else:
             n = N
-        mass_range_exponents = (8, 12)
+        mass_range_exponents = list(np.linspace(7, 13, 20))
         self.particles = [
             newtonian.Particle(
-                mass=random.randint(*[10**i for i in mass_range_exponents]),
+                mass=10**random.choice(mass_range_exponents),
                 position=[random.randint(0, a) for a in self.size],
-                velocity=[(random.random() - 0.5) * 24 for i in range(2)])
+                velocity=[(random.random() - 0.5) * 20 for i in range(2)])
             for i in range(n)
         ]
         # big mass in the center
@@ -126,26 +131,26 @@ class GraphicalSimulation:
         """Update internal surfaces with latest simulation state."""
         if self.frames == 0:
             for t, p in zip(self.turtles, self.field.get_particles()):
+                radius = int((math.log(p.mass**2))**(1 / 2))
                 t.setpos(p.getpos())
                 # pygame.draw.circle(self.bottom_layer, t.color,
                 # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 /
                 # 2)))
                 x, y = tuple(map(int, t.getpos()))
                 pygame.gfxdraw.aacircle(self.bottom_layer, x, y,
-                                        int((math.log(p.mass**2))**(1 / 2)),
-                                        t.color)
+                                        mass_to_radius(p.mass), t.color)
         self.frames += 1
         # self.top_layer.fill(self.bg_color)
         self.top_layer.fill((0, 0, 0, 0))
         # self.surf.fill(self.bg_color)
         for t, p in zip(self.turtles, self.field.get_particles()):
+            radius = int((math.log(p.mass**2))**(1 / 2))
             t.setpos(p.getpos())
             # pygame.draw.circle(self.top_layer, t.color,
-            # tuple(map(int, t.getpos())), int((math.log(p.mass**2))**(1 / 2)))
+            # tuple(map(int, t.getpos())), radius)
             x, y = tuple(map(int, t.getpos()))
             pygame.gfxdraw.filled_circle(self.top_layer, x, y,
-                                         int((math.log(p.mass**2))**(1 / 2)),
-                                         t.color)
+                                         mass_to_radius(p.mass), t.color)
         self.surf.blit(
             self.bottom_layer,
             (0, 0),
@@ -230,11 +235,12 @@ def main():
     def wipe():
         """A quick routine for transition to new simulation after
         a reset"""
-        for i in range(0, 255, 255 // 60):
+        numframes = 30
+        for i in range(0, 255, 255 // numframes):
             DISPLAYSURF.fill((i, i, i))
             pygame.display.update()
             CLOCK.tick(60)
-        for i in range(255, 0, -255 // 60):
+        for i in range(255, 0, -255 // numframes):
             DISPLAYSURF.fill((i, i, i))
             pygame.display.update()
             CLOCK.tick(60)
@@ -250,10 +256,10 @@ def main():
     while True:
         frames += 1
         tf = time.time()
-        if tf - ti >= 60:
+        if tf - ti >= 20:
             print(frames, "frames")
             do_reset = True
-            save()
+            # save()
         if do_reset:
             wipe()
             sim = default_simulation()
@@ -264,7 +270,7 @@ def main():
             #~ print(event)
             if event.type == pygame.QUIT or pygame.mouse.get_pressed()[0] == 1:
                 # handle a quit with saving
-                save()
+                # save()
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
@@ -275,7 +281,8 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-            if pygame.mouse.get_pressed()[2] == 1:
+            if pygame.mouse.get_pressed()[2] == 1 or pygame.key.get_pressed(
+            )[pygame.K_SPACE]:
                 do_reset = True
 
         # advance the simulation in granular steps
