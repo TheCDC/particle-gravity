@@ -22,6 +22,9 @@ def accel_vector(p1, p2):
     F = G * p1.mass * p2.mass / distance(p1, p2)
     a = F / p1.mass
     theta = angle(p1, p2)
+    # if sum(x.mass < 0 for x in [p1, p2]) % 2 == 1:
+        # print(p1, p2)
+        # a += math.pi
     return numpy.array([math.cos(theta), math.sin(theta)]) * a
 
 

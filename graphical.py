@@ -49,7 +49,7 @@ class Turtle:
 
 
 def mass_to_radius(m):
-    return int(2 * ((math.log(m))))
+    return int(2 * ((math.log(abs(m)))))
 
 
 class GraphicalSimulation:
@@ -86,7 +86,7 @@ class GraphicalSimulation:
             n = 12
         else:
             n = N
-        mass_range_exponents = list(np.linspace(7, 13, 20))
+        mass_range_exponents = list(np.linspace(6, 13, 7))
         self.particles = [
             newtonian.Particle(
                 mass=10**random.choice(mass_range_exponents),
@@ -94,6 +94,9 @@ class GraphicalSimulation:
                 velocity=[(random.random() - 0.5) * 20 for i in range(2)])
             for i in range(n)
         ]
+
+        self.particles.sort(key=lambda p: abs(p.mass), reverse=True)
+        # self.particles[0].mass = -self.particles[0].mass
         # big mass in the center
         # self.particles.append(newtonian.Particle(
         #     mass=10**(max(mass_range_exponents)),
@@ -105,6 +108,9 @@ class GraphicalSimulation:
         self.turtles = [
             Turtle(self.bottom_layer, randcolor()) for _ in self.particles
         ]
+        if random.random() < 1/3:
+            self.particles[0].mass = -self.particles[0].mass
+            self.turtles[0].color = (255, 255, 255)
         for t, p in zip(self.turtles, self.field.get_particles()):
             t.penup()
             t.setpos(p.getpos())
@@ -114,23 +120,33 @@ class GraphicalSimulation:
     def update(self, step=1 / 100):
         """Advance the simulation an amount of time equal to step."""
         self.field.time_step(step)
+        by_mass = sorted(
+            self.field.get_particles(),
+            key=lambda p: abs(p.mass),
+            reverse=True)
         if self.enable_boundary:
-            for p in self.field.ps:
+            for p in by_mass:
                 for d in range(2):
                     swapped = False
                     if p.pos[d] > self.size[d]:
-                        p.pos[d] = self.size[d] - 1
+                        p.pos[d] = self.size[d] - abs(p.pos[d] - self.size[d])
                         swapped = True
                     elif p.pos[d] < 0:
-                        p.pos[d] = 0
+                        p.pos[d] *= -1
                         swapped = True
                     if swapped:
                         p.velocity[d] = -p.velocity[d] / 2
+        mouse_pos = pygame.mouse.get_pos()
+        by_mass[0].pos = mouse_pos
 
     def draw(self):
         """Update internal surfaces with latest simulation state."""
+        by_mass = sorted(
+            self.field.get_particles(),
+            key=lambda p: abs(p.mass),
+            reverse=True)
         if self.frames == 0:
-            for t, p in zip(self.turtles, self.field.get_particles()):
+            for t, p in zip(self.turtles, by_mass):
                 radius = int((math.log(p.mass**2))**(1 / 2))
                 t.setpos(p.getpos())
                 # pygame.draw.circle(self.bottom_layer, t.color,
@@ -143,7 +159,7 @@ class GraphicalSimulation:
         # self.top_layer.fill(self.bg_color)
         self.top_layer.fill((0, 0, 0, 0))
         # self.surf.fill(self.bg_color)
-        for t, p in zip(self.turtles, self.field.get_particles()):
+        for t, p in zip(self.turtles, by_mass):
             radius = int((math.log(p.mass**2))**(1 / 2))
             t.setpos(p.getpos())
             # pygame.draw.circle(self.top_layer, t.color,
@@ -179,7 +195,7 @@ def default_simulation(surface=None):
         trail_surface = surface
     sim = GraphicalSimulation(
         trail_surface,
-        random.randint(3, 12),
+        random.randint(6, 12),
         bg_color=(32, 32, 32),
         enable_boundary=True)
     return sim
