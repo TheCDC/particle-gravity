@@ -108,7 +108,7 @@ class GraphicalSimulation:
         self.turtles = [
             Turtle(self.bottom_layer, randcolor()) for _ in self.particles
         ]
-        if random.random() < 1/3:
+        if random.random() < 1 / 3:
             self.particles[0].mass = -self.particles[0].mass
             self.turtles[0].color = (255, 255, 255)
         for t, p in zip(self.turtles, self.field.get_particles()):
@@ -285,14 +285,14 @@ def main():
         for event in pygame.event.get():
             #~ print(event)
             if event.type == pygame.QUIT or pygame.mouse.get_pressed()[0] == 1:
-                # handle a quit with saving
-                # save()
+                # handle a quit without saving
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
             if pygame.key.get_pressed()[pygame.K_q] or pygame.key.get_pressed(
             )[pygame.K_ESCAPE]:
-                # handle a quit without saving
+                # handle a quit with saving
+                save()
                 pygame.mixer.quit()
                 pygame.quit()
                 sys.exit()
