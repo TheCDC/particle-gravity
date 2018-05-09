@@ -86,11 +86,11 @@ class GraphicalSimulation:
             n = 12
         else:
             n = N
-        mass_range_exponents = list(np.linspace(6, 13, 7))
+        mass_range_exponents = list(np.linspace(6, 15, 10))
         self.particles = [
             newtonian.Particle(
                 mass=10**random.choice(mass_range_exponents),
-                position=[random.randint(0, a) for a in self.size],
+                position=np.array([random.randint(0, a) for a in self.size]),
                 velocity=[(random.random() - 0.5) * 20 for i in range(2)])
             for i in range(n)
         ]

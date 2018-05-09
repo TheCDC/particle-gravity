@@ -4,6 +4,7 @@ import random
 import math
 import numpy
 import time
+from itertools import combinations
 # G = 2.071e-43
 G = 6.67300e-11
 
@@ -11,7 +12,11 @@ G = 6.67300e-11
 
 
 def distance(p1, p2):
-    return sum((p1.getpos() - p2.getpos())**2)**(1 / 2)
+    d = sum((p1.getpos() - p2.getpos())**2)**(0.5)
+    if d == 0:
+        raise ValueError('Dist is 0!')
+
+    return d
 
 
 def angle(p1, p2):
@@ -23,8 +28,8 @@ def accel_vector(p1, p2):
     a = F / p1.mass
     theta = angle(p1, p2)
     # if sum(x.mass < 0 for x in [p1, p2]) % 2 == 1:
-        # print(p1, p2)
-        # a += math.pi
+    # print(p1, p2)
+    # a += math.pi
     return numpy.array([math.cos(theta), math.sin(theta)]) * a
 
 
@@ -67,7 +72,7 @@ class Particle:
             return p
 
     def getpos(self):
-        return numpy.array(self.pos)
+        return self.pos
 
     def be_pulled(self, other):
         self.acceleration = accel_vector(self, other)
@@ -103,11 +108,21 @@ class ParticleField:
         return avg_mass
 
     def time_step(self, step):
-        for index, p in enumerate(self.ps):
-            p.acceleration *= 0
-            for i, j in enumerate(self.ps):
-                if i != index:
-                    p.add_pull(j)
+        for a, b in combinations(self.ps, 2):
+            print(a,b)
+            a.acceleration *= 0
+            b.acceleration *= 0
+            a.add_pull(b)
+            b.add_pull(a)
+        # for index, p in enumerate(self.ps):
+        #     for otherindex, other in list(enumerate(self.ps))[index + 1:]:
+        #         print(index, otherindex)
+        #         p.acceleration *= 0
+        #         other.acceleration *= 0
+        #         p.add_pull(other)
+        #         other.add_pull(p)
+        print('===========')
+        for p in self.ps:
             p.simulate(step)
 
 
