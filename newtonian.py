@@ -108,6 +108,7 @@ class ParticleField:
             for i, j in enumerate(self.ps):
                 if i != index:
                     p.add_pull(j)
+        for p in self.ps:
             p.simulate(step)
 
 
