@@ -13,8 +13,6 @@ G = 6.67300e-11
 
 def distance(p1, p2):
     d = sum((p1.getpos() - p2.getpos())**2)**(0.5)
-    if d == 0:
-        raise ValueError('Dist is 0!')
 
     return d
 
@@ -108,20 +106,17 @@ class ParticleField:
         return avg_mass
 
     def time_step(self, step):
-        for a, b in combinations(self.ps, 2):
-            print(a,b)
-            a.acceleration *= 0
-            b.acceleration *= 0
-            a.add_pull(b)
-            b.add_pull(a)
-        # for index, p in enumerate(self.ps):
-        #     for otherindex, other in list(enumerate(self.ps))[index + 1:]:
-        #         print(index, otherindex)
-        #         p.acceleration *= 0
-        #         other.acceleration *= 0
-        #         p.add_pull(other)
-        #         other.add_pull(p)
-        print('===========')
+        for p in self.ps:
+            p.acceleration *= 0
+        # for a, b in combinations(self.ps, 2):
+        #     print(a,b)
+        #     a.add_pull(b)
+        #     b.add_pull(a)
+        for index, p in enumerate(self.ps):
+            for otherindex, other in list(enumerate(self.ps))[index + 1:]:
+                # print(index, otherindex)
+                p.add_pull(other)
+                other.add_pull(p)
         for p in self.ps:
             p.simulate(step)
 
